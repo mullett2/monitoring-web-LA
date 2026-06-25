@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Monitoring</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100">
+    <div class="flex min-h-screen">
+        <aside class="
+        w-20
+        md:w-64
+        bg-blue-900
+        text-white
+        p-4
+        md:p-6
+        flex-shrink-0">
+            <h1 class="text-2xl font-bold mb-10">
+                LAB MONITORING
+            </h1>
+                <ul class="space-y-4">
+                    <li>
+                        <button
+                            onclick="showPage('dashboard')"
+                            class="
+                            w-full
+                            text-left
+                            p-3
+                            rounded-xl
+                            hover:bg-blue-700
+                            text-sm
+                            md:text-base">
+                            Dashboard
+                        </button>
+                    </li>
+
+                    <li>
+                        <button
+                            onclick="showPage('mahasiswa')"
+                            class="
+                            w-full
+                            text-left 
+                            p-3
+                            rounded-xl
+                            hover:bg-blue-700
+                            text-sm
+                            md:text-base">
+                            Data Mahasiswa
+                        </button>
+                    </li>
+                </ul>
+        </aside>
+        <main class="flex-1 p-6 overflow-auto">
+            <!-- Dashboard Page -->
+            <div id="dashboardPage">
+                <div class="grid lg:grid-cols-3 gap-6">
+                    
+                    <!-- Kiri: Judul + Cards -->
+                    <div class="lg:col-span-1">
+                        <h1 class="text-4xl font-bold mb-8">
+                            Dashboard Monitoring
+                            <br>
+                            Laboratorium
+                        </h1>
+
+                        <div class="grid gap-5">
+                            <div class="bg-white p-6 rounded-2xl shadow">
+                                <h2 class="text-gray-500">Total Mahasiswa</h2>
+                                <p id="totalMahasiswa" class="text-4xl font-bold text-blue-600 mt-3">0</p>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow">
+                                <h2 class="text-gray-500">Akses Hari Ini</h2>
+                                <p id="aksesHariIni" class="text-4xl font-bold text-green-600 mt-3">0</p>
+                            </div>
+
+                            <div class="bg-white p-6 rounded-xl shadow">
+                                <h2 class="text-gray-500">Akses Ditolak</h2>
+                                <p id="aksesDitolak" class="text-4xl font-bold text-red-600 mt-3">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kanan: Tabel Riwayat -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl shadow p-6">
+                            <h2 class="text-2xl font-bold mb-6">Riwayat Akses Terbaru</h2>
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="border-b">
+                                        <tr>
+                                            <th class="text-left p-3">Waktu</th>
+                                            <th class="text-left p-3">Nama</th>
+                                            <th class="text-left p-3">UID</th>
+                                            <th class="text-left p-3">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyLog"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Mahasiswa Page -->
+            <div id="mahasiswaPage" class="hidden">
+                <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
+                    <h1 class="text-3xl font-bold">Data Mahasiswa</h1>
+                    <div class="flex gap-3">
+                        <input
+                            id="search"
+                            type="text"
+                            placeholder="Cari mahasiswa..."
+                            class="border rounded-xl px-4 py-2">
+                        <button
+                            id="btnTambah"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl">
+                            Tambah UID
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow overflow-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50">
+                            <tr class="text-gray-600">
+                                <th class="p-4 text-left">UID</th>
+                                <th class="p-4 text-left">Nama</th>
+                                <th class="p-4 text-left">NIM</th>
+                                <th class="p-4 text-left">Hari</th>
+                                <th class="p-4 text-left">Mulai - Selesai</th>
+                                <th class="p-4 text-left">Hapus/Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbodyMahasiswa"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div
+    id="modalMahasiswa"
+    class="hidden fixed inset-0 bg-black/50
+    flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-lg">
+            <h2 class="text-2xl font-bold mb-6">
+                Edit Data Mahasiswa
+            </h2>
+
+            <form id="formMahasiswa" class="space-y-4">
+                <input
+                    id="uid"
+                    readonly
+                    class="w-full border p-3 rounded-xl bg-gray-100"
+                    placeholder="UID RFID">
+
+                <input
+                    id="nama"
+                    class="w-full border p-3 rounded-xl"
+                    placeholder="Nama Mahasiswa">
+
+                <input
+                    id="nim"
+                    class="w-full border p-3 rounded-xl"
+                    placeholder="NIM">
+
+                <select
+                    id="hari"
+                    class="w-full border p-3 rounded-xl">
+
+                    <option value="1">Senin</option>
+                    <option value="2">Selasa</option>
+                    <option value="3">Rabu</option>
+                    <option value="4">Kamis</option>
+                    <option value="5">Jumat</option>
+                    <option value="6">Sabtu</option>
+                </select>
+
+                <label class="font-medium">Jam Mulai</label>
+                    <input
+                        id="mulai"
+                        type="time"
+                        class="w-full border p-3 rounded-xl">
+
+                <label class="font-medium">Jam Selesai</label>
+                    <input
+                        id="selesai"
+                        type="time"
+                        class="w-full border p-3 rounded-xl">
+
+                <select
+                    id="status"
+                    class="w-full border p-3 rounded-xl">
+
+                    <option value="aktif">Aktif</option>
+                    <option value="nonaktif">Nonaktif</option>
+
+                </select>
+
+                <div class="flex justify-end gap-3">
+
+                    <button
+                        type="button"
+                        id="btnTutup"
+                        class="bg-gray-500 text-white px-5 py-3 rounded-xl">
+                        Batal
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="bg-blue-600 text-white px-5 py-3 rounded-xl">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!--tambah uid-->
+    <div
+    id="modalTambahRfid"
+    class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-2xl w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6">
+                Tambah RFID
+            </h2>
+
+            <form id="formTambahRfid">
+
+                <input
+                    id="uidBaru"
+                    class="w-full border p-3 rounded-xl mb-6"
+                    placeholder="UID RFID">
+
+                <div class="flex justify-end gap-3">
+
+                    <button
+                        type="button"
+                        id="btnTutupTambah"
+                        class="bg-gray-500 text-white px-5 py-3 rounded-xl">
+                        Batal
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="bg-blue-600 text-white px-5 py-3 rounded-xl">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+<script type="module" src="js/app.js"></script>
+</body>
