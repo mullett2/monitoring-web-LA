@@ -10,7 +10,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
 //variabel
-let editMode = false;
+let editMode = '';
 let uidLama = '';
 
 //convert hari
@@ -65,45 +65,64 @@ window.hapusMahasiswa = function(uid){
 }
 
 //edit
-window.editMahasiswa =
-async function(uid){
+window.editMahasiswa = async function(uid) {
 
-    const snapshot =
-    await get(
+    const snapshot = await get(
         ref(db, 'mahasiswa/' + uid)
     );
 
-    const data =
-        snapshot.val();
+    if (!snapshot.exists()) {
+        alert('Data mahasiswa tidak ditemukan');
+        return;
+    }
 
-    editMode = true;
+    const data = snapshot.val();
+
+    formMode = 'edit';
     uidLama = uid;
 
-    document.getElementById('uid').value =
-        uid;
-
-    document.getElementById('nama').value =
-        data.nama;
-
-    document.getElementById('nim').value =
-        data.nim;
-
-    document.getElementById('hari').value =
-        data.hari;
-
+    document.getElementById('uid').value = uid;
+    document.getElementById('nama').value = data.nama ?? '';
+    document.getElementById('nim').value = data.nim ?? '';
+    document.getElementById('hari').value = data.hari ?? 1;
     document.getElementById('mulai').value =
-        minutesToTime(data.mulai);
-
+        minutesToTime(data.mulai ?? 0);
     document.getElementById('selesai').value =
-        minutesToTime(data.selesai);
-
+        minutesToTime(data.selesai ?? 0);
     document.getElementById('status').value =
-        data.status;
+        data.status ?? 'aktif';
 
     document
         .getElementById('modalMahasiswa')
         .classList.remove('hidden');
-}
+};
+
+window.daftarRfid = async function(uid) {
+
+    const snapshot = await get(
+        ref(db, 'mahasiswa/' + uid)
+    );
+
+    if (snapshot.exists()) {
+        alert('UID ini sudah terdaftar');
+
+        showPage('mahasiswa');
+        return;
+    }
+
+    formMode = 'daftar';
+    uidLama = uid;
+
+    document.getElementById('formMahasiswa').reset();
+
+    document.getElementById('uid').value = uid;
+    document.getElementById('hari').value = '1';
+    document.getElementById('status').value = 'aktif';
+
+    document
+        .getElementById('modalMahasiswa')
+        .classList.remove('hidden');
+};
 
 // Pindah halaman
 window.showPage = function(page) {
@@ -260,6 +279,24 @@ onValue(ref(db, 'log_akses'), (snapshot) => {
                         ${log.status}
                     </span>
                 </td>
+
+                <td class="p-3">
+
+                    ${
+                        log.status === 'BELUM TERDAFTAR'
+                        ? `
+                            <button
+                                onclick="daftarRfid('${log.uid}')"
+                                class="bg-blue-600 hover:bg-blue-700
+                                    text-white px-3 py-2 rounded-lg">
+                                Daftar
+                            </button>
+                        `
+                        : '-'
+                    }
+
+                </td>
+
             </tr>
         `;
     });
@@ -267,38 +304,60 @@ onValue(ref(db, 'log_akses'), (snapshot) => {
 
 
 document.getElementById('formMahasiswa')
-.addEventListener('submit', (e) => {
+.addEventListener('submit', async (e) => {
 
     e.preventDefault();
 
-   const uid =
-    editMode ? uidLama :
-    document.getElementById('uid').value;
+    const uid = uidLama;
 
     const nama =
-        document.getElementById('nama').value;
+        document.getElementById('nama')
+        .value
+        .trim();
 
     const nim =
-        document.getElementById('nim').value;
-
+        document.getElementById('nim')
+        .value
+        .trim();
 
     const hari =
         parseInt(
             document.getElementById('hari').value
         );
 
+    const mulaiValue =
+        document.getElementById('mulai').value;
+
+    const selesaiValue =
+        document.getElementById('selesai').value;
+
+    const status =
+        document.getElementById('status').value;
+
+
+    // VALIDASI
+
+    if (nama === '' || nim === '') {
+        alert('Nama dan NIM wajib diisi');
+        return;
+    }
+
+    if (mulaiValue === '' || selesaiValue === '') {
+        alert('Jam mulai dan selesai wajib diisi');
+        return;
+    }
+
+
     const mulai =
-        timeToMinutes(
-            document.getElementById('mulai').value
-        );
+        timeToMinutes(mulaiValue);
 
     const selesai =
-        timeToMinutes(
-            document.getElementById('selesai').value
-        );
+        timeToMinutes(selesaiValue);
 
 
-    set(
+    // SIMPAN DATA
+
+    await update(
         ref(db, 'mahasiswa/' + uid),
         {
             nama,
@@ -306,17 +365,47 @@ document.getElementById('formMahasiswa')
             hari,
             mulai,
             selesai,
+            status
         }
     );
 
-    document
-    .getElementById('modalMahasiswa')
-    .classList.add('hidden');
+
+    if (formMode === 'daftar') {
+
+        alert('RFID berhasil didaftarkan');
+
+    } else {
+
+        alert('Data mahasiswa berhasil diperbarui');
+
+    }
+
 
     document
-    .getElementById('formMahasiswa')
-    .reset();
+        .getElementById('modalMahasiswa')
+        .classList.add('hidden');
 
+    document
+        .getElementById('formMahasiswa')
+        .reset();
+
+    formMode = '';
+    uidLama = '';
+});
+
+document.getElementById('btnTutup')
+.addEventListener('click', () => {
+
+    document
+        .getElementById('modalMahasiswa')
+        .classList.add('hidden');
+
+    document
+        .getElementById('formMahasiswa')
+        .reset();
+
+    formMode = '';
+    uidLama = '';
 });
 
 document.getElementById('search')
@@ -365,7 +454,7 @@ async (e) => {
     e.preventDefault();
 
     const uid =
-        documents
+        document
             .getElementById('uidBaru')
             .value
             .trim();
