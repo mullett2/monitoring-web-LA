@@ -10,7 +10,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
 //variabel
-let editMode = '';
+let formMode = '';
 let uidLama = '';
 
 //convert hari
