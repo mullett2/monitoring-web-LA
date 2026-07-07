@@ -62,11 +62,11 @@ function tambahFormJadwal(data = null) {
         document.createElement('div');
 
     item.className =
-        'jadwal-item grid grid-cols-1 md:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-xl';
+        'jadwal-item grid grid-cols-1 md:grid-cols-[1.2fr_1fr_1fr_auto] gap-3 p-4 bg-slate-50 rounded-xl items-center';
 
     item.innerHTML = `
 
-        <select class="jadwal-hari border p-3 rounded-xl">
+        <select class="jadwal-hari min-w-0 w-full border p-3 rounded-xl">
 
             <option value="0">Minggu</option>
             <option value="1">Senin</option>
@@ -80,11 +80,11 @@ function tambahFormJadwal(data = null) {
 
         <input
             type="time"
-            class="jadwal-mulai border p-3 rounded-xl">
+            class="jadwal-mulai min-w-0 w-full border p-3 rounded-xl">
 
         <input
             type="time"
-            class="jadwal-selesai border p-3 rounded-xl">
+            class="jadwal-selesai min-w-0 w-full border p-3 rounded-xl">
 
         <button
             type="button"
