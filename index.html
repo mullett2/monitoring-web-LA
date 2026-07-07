@@ -96,7 +96,6 @@
                                             <th class="text-left p-3">Nama</th>
                                             <th class="text-left p-3">UID</th>
                                             <th class="text-left p-3">Status</th>
-                                            <th class="text-left p-3">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tbodyLog"></tbody>
@@ -133,7 +132,7 @@
                                 <th class="p-4 text-left">Nama</th>
                                 <th class="p-4 text-left">NIM</th>
                                 <th class="p-4 text-left">Hari</th>
-                                <th class="p-4 text-left">Mulai - Selesai</th>
+                                <th class="p-4 text-left">Jadwal Akses</th>
                                 <th class="p-4 text-left">Hapus/Edit</th>
                             </tr>
                         </thead>
@@ -231,18 +230,51 @@
                 Tambah RFID
             </h2>
 
-            <form id="formTambahRfid">
+            <form id="formMahasiswa" class="space-y-4">
+                <input
+                    id="uid"
+                    class="w-full border p-3 rounded-xl"
+                    placeholder="UID RFID"
+                    required>
 
                 <input
-                    id="uidBaru"
-                    class="w-full border p-3 rounded-xl mb-6"
-                    placeholder="UID RFID">
+                    id="nama"
+                    class="w-full border p-3 rounded-xl"
+                    placeholder="Nama Mahasiswa"
+                    required>
 
-                <div class="flex justify-end gap-3">
+                <input
+                    id="nim"
+                    class="w-full border p-3 rounded-xl"
+                    placeholder="NIM"
+                    required>
 
+                <select
+                    id="status"
+                    class="w-full border p-3 rounded-xl">
+
+                    <option value="aktif">Aktif</option>
+                    <option value="nonaktif">Nonaktif</option>
+                </select>
+                <div class="border-t pt-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-lg">
+                            Jadwal Akses
+                        </h3>
+                        <button
+                            type="button"
+                            id="btnTambahJadwal"
+                            class="bg-green-600 hover:bg-green-700
+                                text-white px-3 py-2 rounded-lg">
+                            + Tambah Jadwal
+                        </button>
+                    </div>
+                    <div id="containerJadwal" class="space-y-3"></div>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
                     <button
                         type="button"
-                        id="btnTutupTambah"
+                        id="btnTutup"
                         class="bg-gray-500 text-white px-5 py-3 rounded-xl">
                         Batal
                     </button>
@@ -252,6 +284,7 @@
                         class="bg-blue-600 text-white px-5 py-3 rounded-xl">
                         Simpan
                     </button>
+
                 </div>
             </form>
         </div>

@@ -53,6 +53,79 @@ function minutesToTime(total) {
     return `${jam}:${menit}`;
 }
 
+function tambahFormJadwal(data = null) {
+
+    const container =
+        document.getElementById('containerJadwal');
+
+    const item =
+        document.createElement('div');
+
+    item.className =
+        'jadwal-item grid grid-cols-1 md:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-xl';
+
+    item.innerHTML = `
+
+        <select class="jadwal-hari border p-3 rounded-xl">
+
+            <option value="0">Minggu</option>
+            <option value="1">Senin</option>
+            <option value="2">Selasa</option>
+            <option value="3">Rabu</option>
+            <option value="4">Kamis</option>
+            <option value="5">Jumat</option>
+            <option value="6">Sabtu</option>
+
+        </select>
+
+        <input
+            type="time"
+            class="jadwal-mulai border p-3 rounded-xl">
+
+        <input
+            type="time"
+            class="jadwal-selesai border p-3 rounded-xl">
+
+        <button
+            type="button"
+            class="btn-hapus-jadwal
+                   bg-red-500 hover:bg-red-600
+                   text-white px-3 py-2 rounded-xl">
+            Hapus
+        </button>
+    `;
+
+    container.appendChild(item);
+
+    if (data) {
+
+        item.querySelector('.jadwal-hari').value =
+            data.hari;
+
+        item.querySelector('.jadwal-mulai').value =
+            minutesToTime(data.mulai);
+
+        item.querySelector('.jadwal-selesai').value =
+            minutesToTime(data.selesai);
+    }
+
+    item
+        .querySelector('.btn-hapus-jadwal')
+        .addEventListener('click', () => {
+
+            item.remove();
+
+        });
+}
+
+document
+    .getElementById('btnTambahJadwal')
+    .addEventListener('click', () => {
+
+        tambahFormJadwal();
+
+    });
+
 //delete
 window.hapusMahasiswa = function(uid){
 
@@ -78,19 +151,43 @@ window.editMahasiswa = async function(uid) {
 
     const data = snapshot.val();
 
-    formMode = 'edit';
+    editMode = true;
     uidLama = uid;
 
     document.getElementById('uid').value = uid;
-    document.getElementById('nama').value = data.nama ?? '';
-    document.getElementById('nim').value = data.nim ?? '';
-    document.getElementById('hari').value = data.hari ?? 1;
-    document.getElementById('mulai').value =
-        minutesToTime(data.mulai ?? 0);
-    document.getElementById('selesai').value =
-        minutesToTime(data.selesai ?? 0);
+    document.getElementById('uid').readOnly = true;
+
+    document.getElementById('nama').value =
+        data.nama ?? '';
+
+    document.getElementById('nim').value =
+        data.nim ?? '';
+
     document.getElementById('status').value =
         data.status ?? 'aktif';
+
+
+    const container =
+        document.getElementById('containerJadwal');
+
+    container.innerHTML = '';
+
+
+    if (data.jadwal) {
+
+        Object.values(data.jadwal)
+            .forEach((jadwal) => {
+
+                tambahFormJadwal(jadwal);
+
+            });
+
+    } else {
+
+        tambahFormJadwal();
+
+    }
+
 
     document
         .getElementById('modalMahasiswa')
@@ -158,6 +255,25 @@ onValue(ref(db, 'mahasiswa'), (snapshot) => {
         const uid = child.key;
         const data = child.val();
 
+        let tampilanJadwal = '-';
+
+        if (data.jadwal) {
+
+            tampilanJadwal =
+                Object.values(data.jadwal)
+                    .map(jadwal => {
+
+                        return `
+                            ${getNamaHari(jadwal.hari)}
+                            ${minutesToTime(jadwal.mulai)}
+                            -
+                            ${minutesToTime(jadwal.selesai)}
+                        `;
+
+                    })
+                    .join('<br>');
+        }
+
         tbody.innerHTML += `
             <tr class="border-b hover:bg-slate-50 transition">
                 <td class="p-4 font-medium">${uid}</td>
@@ -170,14 +286,8 @@ onValue(ref(db, 'mahasiswa'), (snapshot) => {
                     ${data.nim}
                 </td>
 
-                <td class="p-4">
-                    ${getNamaHari(data.hari)}
-                </td>
-
-                <td class="p-4">
-                    ${minutesToTime(data.mulai)}
-                    -
-                    ${minutesToTime(data.selesai)}
+                <td class="p-4 leading-7">
+                    ${tampilanJadwal}
                 </td>
 
                 <td class="p-4">
@@ -280,22 +390,7 @@ onValue(ref(db, 'log_akses'), (snapshot) => {
                     </span>
                 </td>
 
-                <td class="p-3">
-
-                    ${
-                        log.status === 'BELUM TERDAFTAR'
-                        ? `
-                            <button
-                                onclick="daftarRfid('${log.uid}')"
-                                class="bg-blue-600 hover:bg-blue-700
-                                    text-white px-3 py-2 rounded-lg">
-                                Daftar
-                            </button>
-                        `
-                        : '-'
-                    }
-
-                </td>
+                
 
             </tr>
         `;
@@ -303,95 +398,158 @@ onValue(ref(db, 'log_akses'), (snapshot) => {
 });
 
 
-document.getElementById('formMahasiswa')
-.addEventListener('submit', async (e) => {
+document
+    .getElementById('formMahasiswa')
+    .addEventListener('submit', async (e) => {
 
-    e.preventDefault();
+        e.preventDefault();
 
-    const uid = uidLama;
 
-    const nama =
-        document.getElementById('nama')
-        .value
-        .trim();
+        const uid =
+            document
+                .getElementById('uid')
+                .value
+                .trim();
 
-    const nim =
-        document.getElementById('nim')
-        .value
-        .trim();
+        const nama =
+            document
+                .getElementById('nama')
+                .value
+                .trim();
 
-    const hari =
-        parseInt(
-            document.getElementById('hari').value
+        const nim =
+            document
+                .getElementById('nim')
+                .value
+                .trim();
+
+        const status =
+            document
+                .getElementById('status')
+                .value;
+
+
+        if (uid === '' || nama === '' || nim === '') {
+
+            alert('UID, Nama, dan NIM wajib diisi');
+            return;
+        }
+
+
+        // Cek UID saat tambah data baru
+
+        if (!editMode) {
+
+            const cekUid = await get(
+                ref(db, 'mahasiswa/' + uid)
+            );
+
+            if (cekUid.exists()) {
+
+                alert('UID sudah terdaftar');
+                return;
+            }
+        }
+
+
+        // Ambil seluruh jadwal
+
+        const jadwalItems =
+            document.querySelectorAll('.jadwal-item');
+
+        if (jadwalItems.length === 0) {
+
+            alert('Minimal satu jadwal akses');
+            return;
+        }
+
+
+        const jadwal = {};
+
+        let jadwalValid = true;
+
+
+        jadwalItems.forEach((item, index) => {
+
+            const hari =
+                parseInt(
+                    item.querySelector('.jadwal-hari').value
+                );
+
+            const mulaiText =
+                item.querySelector('.jadwal-mulai').value;
+
+            const selesaiText =
+                item.querySelector('.jadwal-selesai').value;
+
+
+            if (
+                mulaiText === '' ||
+                selesaiText === ''
+            ) {
+
+                jadwalValid = false;
+                return;
+            }
+
+
+            const mulai =
+                timeToMinutes(mulaiText);
+
+            const selesai =
+                timeToMinutes(selesaiText);
+
+
+            jadwal['jadwal' + (index + 1)] = {
+                hari,
+                mulai,
+                selesai
+            };
+
+        });
+
+
+        if (!jadwalValid) {
+
+            alert('Semua jadwal harus diisi lengkap');
+            return;
+        }
+
+
+        await update(
+            ref(db, 'mahasiswa/' + uid),
+            {
+                nama,
+                nim,
+                status,
+                jadwal
+            }
         );
 
-    const mulaiValue =
-        document.getElementById('mulai').value;
 
-    const selesaiValue =
-        document.getElementById('selesai').value;
-
-    const status =
-        document.getElementById('status').value;
+        alert(
+            editMode
+                ? 'Data berhasil diperbarui'
+                : 'Mahasiswa berhasil ditambahkan'
+        );
 
 
-    // VALIDASI
+        document
+            .getElementById('modalMahasiswa')
+            .classList.add('hidden');
 
-    if (nama === '' || nim === '') {
-        alert('Nama dan NIM wajib diisi');
-        return;
-    }
+        document
+            .getElementById('formMahasiswa')
+            .reset();
 
-    if (mulaiValue === '' || selesaiValue === '') {
-        alert('Jam mulai dan selesai wajib diisi');
-        return;
-    }
+        document
+            .getElementById('containerJadwal')
+            .innerHTML = '';
 
+        editMode = false;
+        uidLama = '';
 
-    const mulai =
-        timeToMinutes(mulaiValue);
-
-    const selesai =
-        timeToMinutes(selesaiValue);
-
-
-    // SIMPAN DATA
-
-    await update(
-        ref(db, 'mahasiswa/' + uid),
-        {
-            nama,
-            nim,
-            hari,
-            mulai,
-            selesai,
-            status
-        }
-    );
-
-
-    if (formMode === 'daftar') {
-
-        alert('RFID berhasil didaftarkan');
-
-    } else {
-
-        alert('Data mahasiswa berhasil diperbarui');
-
-    }
-
-
-    document
-        .getElementById('modalMahasiswa')
-        .classList.add('hidden');
-
-    document
-        .getElementById('formMahasiswa')
-        .reset();
-
-    formMode = '';
-    uidLama = '';
-});
+    });
 
 document.getElementById('btnTutup')
 .addEventListener('click', () => {
@@ -431,12 +589,32 @@ document.getElementById('search')
             });
         });
 
-document.getElementById('btnTambah')
+document
+    .getElementById('btnTambah')
     .addEventListener('click', () => {
 
+        editMode = false;
+        uidLama = '';
+
         document
-            .getElementById('modalTambahRfid')
+            .getElementById('formMahasiswa')
+            .reset();
+
+        document
+            .getElementById('containerJadwal')
+            .innerHTML = '';
+
+        // Jadwal pertama otomatis tersedia
+        tambahFormJadwal();
+
+        document
+            .getElementById('uid')
+            .readOnly = false;
+
+        document
+            .getElementById('modalMahasiswa')
             .classList.remove('hidden');
+
     });
 
 document.getElementById('btnTutupTambah')
