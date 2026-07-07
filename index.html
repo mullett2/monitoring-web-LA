@@ -119,7 +119,7 @@
                         <button
                             id="btnTambah"
                             class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl">
-                            Tambah UID
+                            Tambah Kartu
                         </button>
                     </div>
                 </div>
@@ -142,91 +142,13 @@
         </main>
     </div>
 
-    <div
-    id="modalMahasiswa"
-    class="hidden fixed inset-0 bg-black/50
-    flex items-center justify-center z-50">
-        <div class="bg-white p-8 rounded-2xl w-full max-w-lg">
-            <h2 class="text-2xl font-bold mb-6">
-                Edit Data Mahasiswa
-            </h2>
-
-            <form id="formMahasiswa" class="space-y-4">
-                <input
-                    id="uid"
-                    readonly
-                    class="w-full border p-3 rounded-xl bg-gray-100"
-                    placeholder="UID RFID">
-
-                <input
-                    id="nama"
-                    class="w-full border p-3 rounded-xl"
-                    placeholder="Nama Mahasiswa">
-
-                <input
-                    id="nim"
-                    class="w-full border p-3 rounded-xl"
-                    placeholder="NIM">
-
-                <select
-                    id="hari"
-                    class="w-full border p-3 rounded-xl">
-
-                    <option value="1">Senin</option>
-                    <option value="2">Selasa</option>
-                    <option value="3">Rabu</option>
-                    <option value="4">Kamis</option>
-                    <option value="5">Jumat</option>
-                    <option value="6">Sabtu</option>
-                </select>
-
-                <label class="font-medium">Jam Mulai</label>
-                    <input
-                        id="mulai"
-                        type="time"
-                        class="w-full border p-3 rounded-xl">
-
-                <label class="font-medium">Jam Selesai</label>
-                    <input
-                        id="selesai"
-                        type="time"
-                        class="w-full border p-3 rounded-xl">
-
-                <select
-                    id="status"
-                    class="w-full border p-3 rounded-xl">
-
-                    <option value="aktif">Aktif</option>
-                    <option value="nonaktif">Nonaktif</option>
-
-                </select>
-
-                <div class="flex justify-end gap-3">
-
-                    <button
-                        type="button"
-                        id="btnTutup"
-                        class="bg-gray-500 text-white px-5 py-3 rounded-xl">
-                        Batal
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="bg-blue-600 text-white px-5 py-3 rounded-xl">
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!--tambah uid-->
     <div
-    id="modalTambahRfid"
+    id="modalMahasiswa"
     class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div class="bg-white p-8 rounded-2xl w-full max-w-md">
             <h2 class="text-2xl font-bold mb-6">
-                Tambah RFID
+                Tambah
             </h2>
 
             <form id="formMahasiswa" class="space-y-4">

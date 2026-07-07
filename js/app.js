@@ -380,8 +380,9 @@ document
         e.preventDefault();
 
 
-        const uid =
-            document
+        const uid = editMode
+            ? uidLama
+            : document
                 .getElementById('uid')
                 .value
                 .trim();
@@ -433,36 +434,68 @@ document
             document.querySelectorAll('.jadwal-item');
 
         if (jadwalItems.length === 0) {
-
             alert('Minimal satu jadwal akses');
             return;
         }
 
-
         const jadwal = {};
-
         let jadwalValid = true;
-
 
         jadwalItems.forEach((item, index) => {
 
-            const hari =
-                parseInt(
-                    item.querySelector('.jadwal-hari').value
+            const inputHari =
+                item.querySelector('.jadwal-hari');
+
+            const inputMulai =
+                item.querySelector('.jadwal-mulai');
+
+            const inputSelesai =
+                item.querySelector('.jadwal-selesai');
+
+
+            // Pastikan elemen ditemukan
+            if (!inputHari || !inputMulai || !inputSelesai) {
+                console.error(
+                    `Elemen jadwal ke-${index + 1} tidak ditemukan`,
+                    item
                 );
 
+                jadwalValid = false;
+                return;
+            }
+
+
+            const hari =
+                Number(inputHari.value);
+
             const mulaiText =
-                item.querySelector('.jadwal-mulai').value;
+                inputMulai.value;
 
             const selesaiText =
-                item.querySelector('.jadwal-selesai').value;
+                inputSelesai.value;
 
 
+            // Validasi hari
+            if (
+                !Number.isInteger(hari) ||
+                hari < 0 ||
+                hari > 6
+            ) {
+                console.error(
+                    `Hari jadwal ke-${index + 1} tidak valid:`,
+                    inputHari.value
+                );
+
+                jadwalValid = false;
+                return;
+            }
+
+
+            // Validasi jam
             if (
                 mulaiText === '' ||
                 selesaiText === ''
             ) {
-
                 jadwalValid = false;
                 return;
             }
@@ -475,28 +508,44 @@ document
                 timeToMinutes(selesaiText);
 
 
-            jadwal['jadwal' + (index + 1)] = {
-                hari,
-                mulai,
-                selesai
-            };
+            if (
+                Number.isNaN(mulai) ||
+                Number.isNaN(selesai)
+            ) {
+                jadwalValid = false;
+                return;
+            }
 
+
+            jadwal['jadwal' + (index + 1)] = {
+                hari: hari,
+                mulai: mulai,
+                selesai: selesai
+            };
         });
 
 
-        if (!jadwalValid) {
+if (!jadwalValid) {
+    alert('Data jadwal tidak valid atau belum lengkap');
+    return;
+}
 
-            alert('Semua jadwal harus diisi lengkap');
-            return;
-        }
+        const snapshotLama = await get(
+            ref(db, 'mahasiswa/' + uid)
+        );
 
+        const dataLama =
+            snapshotLama.exists()
+                ? snapshotLama.val()
+                : {};
 
-        await update(
+        await set(
             ref(db, 'mahasiswa/' + uid),
             {
                 nama,
                 nim,
                 status,
+                chatId: dataLama.chatId ?? '',
                 jadwal
             }
         );
@@ -536,8 +585,12 @@ document.getElementById('btnTutup')
     document
         .getElementById('formMahasiswa')
         .reset();
+        
+    document
+        .getElementById('containerJadwal')
+        .innerHTML = '';    
 
-    formMode = '';
+    editMode = false;
     uidLama = '';
 });
 
