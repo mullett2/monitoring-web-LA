@@ -10,7 +10,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
 
 //variabel
-let formMode = '';
+let editMode = false;
 let uidLama = '';
 
 //convert hari
@@ -194,33 +194,6 @@ window.editMahasiswa = async function(uid) {
         .classList.remove('hidden');
 };
 
-window.daftarRfid = async function(uid) {
-
-    const snapshot = await get(
-        ref(db, 'mahasiswa/' + uid)
-    );
-
-    if (snapshot.exists()) {
-        alert('UID ini sudah terdaftar');
-
-        showPage('mahasiswa');
-        return;
-    }
-
-    formMode = 'daftar';
-    uidLama = uid;
-
-    document.getElementById('formMahasiswa').reset();
-
-    document.getElementById('uid').value = uid;
-    document.getElementById('hari').value = '1';
-    document.getElementById('status').value = 'aktif';
-
-    document
-        .getElementById('modalMahasiswa')
-        .classList.remove('hidden');
-};
-
 // Pindah halaman
 window.showPage = function(page) {
   document.getElementById('dashboardPage')
@@ -276,7 +249,9 @@ onValue(ref(db, 'mahasiswa'), (snapshot) => {
 
         tbody.innerHTML += `
             <tr class="border-b hover:bg-slate-50 transition">
-                <td class="p-4 font-medium">${uid}</td>
+                <td class="p-4 font-medium">
+                    ${uid}
+                </td>
 
                 <td class="p-4">
                     ${data.nama}
@@ -616,61 +591,3 @@ document
             .classList.remove('hidden');
 
     });
-
-document.getElementById('btnTutupTambah')
-    .addEventListener('click', () => {
-
-        document
-            .getElementById('modalTambahRfid')
-            .classList.add('hidden');
-    });
-
-document.getElementById('formTambahRfid')
-.addEventListener('submit',
-async (e) => {
-
-    e.preventDefault();
-
-    const uid =
-        document
-            .getElementById('uidBaru')
-            .value
-            .trim();
-
-    if(uid === ''){
-        alert('UID kosong');
-        return;
-    }
-
-    const snapshot =
-        await get(
-            ref(db, 'mahasiswa/' + uid)
-        );
-
-    if(snapshot.exists()){
-        alert('UID sudah terdaftar');
-        return;
-    }
-
-    await update(
-        ref(db, 'mahasiswa/' + uid),
-        {
-            nama: '-',
-            nim: '-',
-            hari: 0,
-            mulai: 0,
-            selesai: 0
-        }
-    );
-
-    alert('RFID berhasil ditambahkan');
-
-    document
-        .getElementById('formTambahRfid')
-        .reset();
-
-    document
-        .getElementById('modalTambahRfid')
-        .classList.add('hidden');
-
-});
