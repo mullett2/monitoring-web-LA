@@ -644,3 +644,52 @@ document
             .classList.remove('hidden');
 
     });
+
+const switchTampilUid =
+    document.getElementById('switchTampilUid');
+
+const statusTampilUid =
+    document.getElementById('statusTampilUid');
+
+
+// ==========================================
+// BACA STATUS DARI FIREBASE
+// ==========================================
+
+onValue(
+    ref(db, 'pengaturan/tampil_uid'),
+    (snapshot) => {
+
+        const aktif =
+            snapshot.val() === true;
+
+        switchTampilUid.checked =
+            aktif;
+
+        statusTampilUid.innerText =
+            aktif
+                ? 'Aktif'
+                : 'Nonaktif';
+    }
+);
+
+
+// ==========================================
+// UBAH STATUS DARI WEBSITE
+// ==========================================
+
+switchTampilUid.addEventListener(
+    'change',
+    async function () {
+
+        const aktif =
+            this.checked;
+
+        await update(
+            ref(db, 'pengaturan'),
+            {
+                tampil_uid: aktif
+            }
+        );
+    }
+);
