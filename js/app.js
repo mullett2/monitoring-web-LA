@@ -319,7 +319,7 @@ onValue(ref(db, 'log_akses'), (snapshot) => {
 
                 aksesHariIni++;
 
-                if (log.status === 'DITOLAK') {
+                if (log.status === 'DITOLAK (JADWAL)') {
                     aksesDitolak++;
                 }
             }
